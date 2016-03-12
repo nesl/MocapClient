@@ -18,7 +18,7 @@ class MocapFrame:
 		self.timestamp = ts
 
 	def addRigidBody(self, rb):
-		self.rigidBodies.extend(rb)
+		self.rigidBodies.append(rb)
 
 	def getRigidBodies(self):
 		return self.rigidBodies
@@ -31,7 +31,7 @@ class RigidBody:
 		self.quat = quat
 
 	def __str__(self):
-		return "Rigid Body [%d] @ (%.3f, %.3f, %.3f" % (self.id, self.xyz[0], self.xyz[1], self.xyz[2])
+		return "Rigid Body [%d] @ (%.3f, %.3f, %.3f)" % (self.id, self.xyz[0], self.xyz[1], self.xyz[2])
 
 
 class MocapClient:
@@ -77,13 +77,10 @@ class MocapClient:
 		num = struct.unpack("I", bytes[idx:(idx+4)])[0]
 		frame.setFrameNum( num )
 		idx += 4
-		print '-----------'
-		print num
 
 		# MARKER SETS
 		numMarkerSets = struct.unpack("I", bytes[idx:(idx+4)])[0]
 		idx += 4
-		print numMarkerSets
 		for i in range(numMarkerSets):
 			# ignore name by reading until null terminator found
 			while bytes[idx] != '\0':
