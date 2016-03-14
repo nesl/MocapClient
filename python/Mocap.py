@@ -5,68 +5,83 @@ import time
 
 class MocapFrame:
 	def __init__(self):
-		self.rigidBodies = []
-		self.skeletons = []
-		self.markers = []
-		self.framenum = 0
-		self.timestamp = 0
+		self._rigidBodies = []
+		self._skeletons = []
+		self._markers = []
+		self._framenum = 0
+		self._timestamp = 0
 
 	def setFrameNum(self, num):
-		self.framenum = num
+		self._framenum = num
+
+	def getFrameNum(self):
+		return self._framenum
 
 	def setTimestamp(self, ts):
-		self.timestamp = ts
+		self._timestamp = ts
+
+	def getTimestamp(self):
+		return self._timestamp
 
 	def addRigidBody(self, rb):
-		self.rigidBodies.append(rb)
+		self._rigidBodies.append(rb)
 
 	def getRigidBodies(self):
-		return self.rigidBodies
+		return self._rigidBodies
 
 
 class RigidBody:
 	def __init__(self, uid, xyz, quat):
-		self.id = uid
-		self.xyz = xyz
-		self.quat = quat
+		self._id = uid
+		self._xyz = xyz
+		self._quat = quat
+
+	def getId(self):
+		return self._id
+
+	def getPosition(self):
+		return self._xyz
+
+	def getQuaternion(self):
+		return self._quat		
 
 	def __str__(self):
-		return "Rigid Body [%d] @ (%.3f, %.3f, %.3f)" % (self.id, self.xyz[0], self.xyz[1], self.xyz[2])
+		return "Rigid Body [%d] @ (%.3f, %.3f, %.3f)" % (self._id, self._xyz[0], self._xyz[1], self._xyz[2])
 
 
 class MocapClient:
 
 	def __init__(self, mcast_group, cmd_port, clnt_port):
-		self.connected = False
-		self.cmd_port = cmd_port
-		self.clnt_port = clnt_port
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		#try:
-		self.sock.bind(('', clnt_port))
-		self.connected = True
-		mreq = struct.pack("4sl", socket.inet_aton(mcast_group), socket.INADDR_ANY)
-		self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-		#except:
-		#	raise  OSError('Cannot bind to specified address and port')
+		self._connected = False
+		self._cmd_port = cmd_port
+		self._clnt_port = clnt_port
+		self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+		self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		try:
+			self._sock.bind(('', clnt_port))
+			self._connected = True
+			mreq = struct.pack("4sl", socket.inet_aton(mcast_group), socket.INADDR_ANY)
+			self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+		except:
+			raise  OSError('Cannot bind to specified address and port')
 
 	def disconnect(self):
-		self.connected = False
+		self._connected = False
 
 	# listen for inbound traffic
 	def listen(self):
 		# connect if not connected yet
-		if not self.connected:
+		if not self._connected:
 			return;
 
-		while self.connected:
+		while self._connected:
 			time.sleep(0.01)
-			data = self.sock.recv(2048)
-			frame = self.parseRawData(data)
+			data = self._sock.recv(2048)
+			frame = self._parseRawData(data)
 			for rb in frame.getRigidBodies():
 				print rb
 
-	def parseRawData(self, bytes):
+	def _parseRawData(self, bytes):
 		# mocap frame to be returned
 		frame = MocapFrame()
 		# index begins at byte 0 and is advanced along the way
