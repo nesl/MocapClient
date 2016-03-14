@@ -97,7 +97,9 @@ class MocapClient:
 		# OTHER MARKERS
 		numMarkers = struct.unpack("I", bytes[idx:(idx+4)])[0]
 		idx += 4
-		# TODO: PARSE MARKERS
+		for i in range(numMarkers):
+			# ignore unmarked markers for now
+			idx += 3*4
 
 		# RIGID BODIES
 		numRigidBodies = struct.unpack("I", bytes[idx:(idx+4)])[0]
