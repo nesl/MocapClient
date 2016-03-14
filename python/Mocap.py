@@ -17,12 +17,6 @@ class MocapFrame:
 	def getFrameNum(self):
 		return self._framenum
 
-	def setTimestamp(self, ts):
-		self._timestamp = ts
-
-	def getTimestamp(self):
-		return self._timestamp
-
 	def addRigidBody(self, rb):
 		self._rigidBodies.append(rb)
 
@@ -78,8 +72,7 @@ class MocapClient:
 			time.sleep(0.01)
 			data = self._sock.recv(2048)
 			frame = self._parseRawData(data)
-			for rb in frame.getRigidBodies():
-				print rb
+			yield frame
 
 	def _parseRawData(self, bytes):
 		# mocap frame to be returned
